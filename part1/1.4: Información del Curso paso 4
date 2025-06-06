@@ -1,0 +1,70 @@
+
+const Header = (props) => {
+  console.log(props.course);
+  return (
+    <>
+      <h1>{props.course}</h1>
+    </>
+  )
+}
+const Part = (props) => {
+  console.log(props.parts, props.exercises);
+  return (
+    <p>{props.parts} {props.exercises}</p>
+  )
+}
+const Content = (props) => {
+  console.log('Esto trae el prop:', props);
+  return (
+    <div>
+      <Part parts={props.parts[0].name} exercises={props.parts[0].exercises} />
+      <Part parts={props.parts[1].name} exercises={props.parts[1].exercises} />
+      <Part parts={props.parts[2].name} exercises={props.parts[2].exercises} />
+    </div>
+  )
+}
+
+const Total = (props) => {
+
+  
+  const total = props.parts[0].exercises + props.parts[1].exercises + props.parts[2].exercises;
+  return (
+    <>
+      <h3>
+        Total number of exercises: {total}
+      </h3>
+    </>
+  )
+}
+
+const App = () => {
+  const course = 'Helf Stack aplicattion developer';
+
+  const parts = [
+    {
+      name: 'Fundamentals os Resct',
+      exercises: 10
+    },
+    {
+      name: 'Using props to pass data',
+      exercises: 7
+    },
+    {
+      name: 'State of a component',
+      exercises: 14
+    }
+  ];
+  return (
+    <div>
+      <Header course={course} />
+      <Content parts = {parts} />
+    {/* <Content part2={part2.name} exercise2={part2.exercises} />
+      <Content part3={part3.name} exercise3={part3.exercises} />
+      */}
+      <Total parts = {parts} />
+    </div>
+  )
+
+}
+
+export default App
