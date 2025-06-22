@@ -1,0 +1,68 @@
+
+const Header = (props) => {
+  console.log('Header: ', props.course);
+  return (
+    <>
+      <h1>{props.course}</h1>
+    </>
+  )
+}
+
+const Content = ({course}) => {
+  console.log('Esto trae el prop:', course);
+  console.log('Esto se ve en course.parts: ', course);
+  return (
+    <div>
+      {
+        course.map( p =>
+        <Part key={p.id} parts={p.name} exercises={p.exercises} />,
+        
+        )
+      }
+      <Total parts ={course}/>
+    </div>
+  )
+}
+
+const Part = (props) => {
+  console.log('aquui paso partes', props.parts, props.exercises);
+  return (
+    <p>{props.parts} {props.exercises}</p>
+  )
+}
+
+const Total = ({parts}) => {
+
+console.log('En total esto es parts: ', parts);
+  const total = parts.reduce((suma, part) => suma + part.exercises, 0);
+  console.log('Suma total: ', total);
+  return (
+    <>
+      <h3>
+        Total number of exercises: {total}
+      </h3>
+    </>
+  )
+}
+
+const Course = ({ course }) => {
+  console.log('Esto se pasa a Curso. ', course[0]);
+
+
+  return (
+    <div>
+      {course.map(cour =>
+      <div key={cour.id}>
+      <Header  course={cour.name} />
+      <Content  course={cour.parts} />
+      </div>
+      
+      )}
+      
+     {//
+     }
+    </div>
+  )
+}
+
+export default Course;
