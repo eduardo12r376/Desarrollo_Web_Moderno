@@ -1,0 +1,147 @@
+import { useState } from 'react';
+import Course from './Components/Course.jsx';
+
+
+const Title = ({ title }) => <h1>{title}</h1>
+
+
+const Button = ({ handleClick, text }) => <button onClick={handleClick}>{text}</button>
+
+const StatisticsLine = ({ text, value }) => {
+
+  return (
+
+    <tr>
+      <td>{text}</td>
+      <td>{value}</td>
+    </tr>
+
+  )
+};
+
+const Statistics = ({ good, neutral, bad }) => {
+
+  const all = good + neutral + bad;
+  const promedio = (good - bad) / all ? (good - bad) / all : 0;
+  const commPositivo = (good / all) * 100 ? (good / all) * 100 : 0;
+  const commNegativos = (bad / all) * 100 ? (bad / all) * 100 : 0;
+  console.log('nan', (good - bad) / all);
+
+  if (all > 0) {
+    return (
+      <div>
+        <h1>Statistics</h1>
+        <table>
+          <tbody>
+            <StatisticsLine text='Good' value={good} />
+            <StatisticsLine text='Neutral' value={neutral} />
+            <StatisticsLine text='Bad' value={bad} />
+
+            <StatisticsLine text='Todas' value={all} />
+
+            <StatisticsLine text='Promedio' value={promedio} />
+            <StatisticsLine text='Comentarios positivos %:' value={commPositivo} />
+            <StatisticsLine text='Comentarios negativos %:' value={commNegativos} />
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+  return (
+    <div>
+      <h1>Statistics</h1>
+      <h3>No feedback given</h3>
+    </div>
+  )
+}
+
+const AnecdoteMostVoted = ({ anecdotes, votes }) => {
+  console.log('Esto trae anecdotes: ', votes);
+  const maxVotes = Math.max(...votes);
+  console.log('Maximo de votos: ', maxVotes);
+  const indexMaxVotes = votes.indexOf(maxVotes);
+
+  return (
+    <div>
+      <h1>Anecdotes with most votes</h1>
+      <h3>{anecdotes[indexMaxVotes]}</h3>
+    </div>
+  )
+}
+
+const ViewPerson = ({person}) =>{
+  return(
+    <li>{person.name} : {person.number}</li>
+  )
+}
+
+const App = () => {
+
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+
+  const [persons, setPersons] = useState([
+    {name: 'Eduardo'}
+  ]);
+  const [newName, setNewName] = useState('');
+  const [newNumber, setNewNumber] = useState('');
+
+  const addPerson = (event) =>{
+    console.log('Persona agregada:', newName,' ', newNumber);
+    event.preventDefault();
+    const personExist = persons.find(person => person.name === newName);
+    console.log('Persona existe:', personExist);
+    if(!personExist){
+    const personObject = {
+      name: newName,
+      number: newNumber
+    }
+    setPersons(persons.concat(personObject));
+    setNewName('');
+  }
+  else
+  //window.alert(`Èl nombre: ${newName} ya existe en la lista de constactos.`);
+  window.alert('El nombre: '+ newName +' ya eiste en a lista de constactos.');
+  }
+
+
+const handlePersonChange = (event) =>{
+  console.log(event.target.value);
+  setNewName(event.target.value);
+}
+
+const handleNumberChange = (event) =>{
+  console.log(event.target.value);
+  setNewNumber(event.target.value);
+}
+
+  return (
+    <div>
+
+      <h2>Phonebook</h2>
+      <form onSubmit={addPerson}>
+        <div>
+          Nombre: <input value={newName} onChange={handlePersonChange}/>
+        </div>
+        <br />
+        <div>
+          Número: <input value={newNumber} onChange={handleNumberChange} />
+        </div>
+        <div>
+          <button type="submit" >Agregar</button>
+        </div>
+      </form>
+      
+      <h2>Numbers</h2>
+      <ul>
+        {persons.map(person =>
+          <ViewPerson key={person.name} person={person}/>
+        )}
+      </ul>
+    </div>
+  )
+
+}
+
+export default App
