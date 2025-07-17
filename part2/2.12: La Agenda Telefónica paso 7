@@ -1,0 +1,141 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import Course from './Components/Course.jsx';
+
+
+const Title = ({ title }) => <h1>{title}</h1>
+
+
+const Button = ({ handleClick, text }) => <button onClick={handleClick}>{text}</button>
+
+
+
+const ViewPerson = ({ person }) => {
+  return (
+    <li>{person.name} : {person.number}</li>
+  )
+}
+
+const FilterPersons = ({ filter, handleFilterChange }) => {
+  return (
+    <div>
+      Filtrar por: <input value={filter} onChange={handleFilterChange} />
+    </div>
+
+  )
+}
+
+const AddContact = ({ addPerson, newname, newnumber, personChange, numberChange }) => {
+  return (
+    <form onSubmit={addPerson}>
+      <div>
+        Nombre: <input value={newname} onChange={personChange} />
+      </div>
+      <br />
+      <div>
+        Número: <input value={newnumber} onChange={numberChange} />
+      </div>
+      <div>
+        <button type="submit" >Agregar</button>
+      </div>
+    </form>
+  )
+}
+
+const App = () => {
+
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+
+  const [persons, setPersons] = useState([]);
+  const [newName, setNewName] = useState('');
+  const [newNumber, setNewNumber] = useState('');
+  const [filter, setFilter] = useState('');
+
+
+  const hook = () => {
+    console.log('effect');
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }
+
+  useEffect(hook, []);
+
+  const addPerson = (event) => {
+    console.log('Persona agregada:', newName, ' ', newNumber);
+    event.preventDefault();
+    const personExist = persons.find(person => person.name === newName);
+    console.log('Persona existe:', personExist);
+    if (!personExist) {
+      const personObject = {
+        name: newName,
+        number: newNumber
+      }
+      axios
+        .post('http://localhost:3001/persons', personObject)
+        .then(response => {
+          setPersons(persons.concat(response.data));
+          setNewName('');
+          setNewNumber('');
+        })
+
+
+    }
+    else
+      //window.alert(`Èl nombre: ${newName} ya existe en la lista de contactos.`);
+      window.alert('El nombre: ' + newName + ' ya existe en la lista de contactos.');
+  }
+
+  const handlePersonChange = (event) => {
+    console.log(event.target.value);
+    setNewName(event.target.value);
+  }
+
+  const handleNumberChange = (event) => {
+    console.log(event.target.value);
+    setNewNumber(event.target.value);
+  }
+
+  const handleFilterChange = (event) => {
+    console.log(event.target.value);
+    setFilter(event.target.value);
+
+
+  }
+
+  return (
+    <div>
+
+      <h2>Phonebook</h2>
+      <FilterPersons filter={filter} handleFilterChange={handleFilterChange} />
+      <h2>Agregar un contacto</h2>
+      <AddContact
+        addPerson={addPerson}
+        newname={newName}
+        newnumber={newNumber}
+        personChange={handlePersonChange}
+        numberChange={handleNumberChange} />
+
+      <h2>Contactos</h2>
+      <ul>
+        {
+          (filter
+            ? persons.filter(person =>
+              person.name.toLowerCase().includes(filter.toLowerCase())
+            )
+            : persons
+          ).map(person =>
+            <ViewPerson key={person.id} person={person} />
+          )
+        }
+      </ul>
+    </div>
+  )
+
+}
+
+export default App
