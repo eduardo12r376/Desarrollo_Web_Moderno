@@ -1,0 +1,152 @@
+import { useState, useEffect } from 'react'
+import countriesService from './services/countries'
+import weatherService from './services/weather'
+import './App.css'
+
+const SearchCountries = ({ CountrySearch, Search }) => {
+  return (
+    <div>
+      Buscar país: <input onChange={CountrySearch} value={Search} />
+    </div>
+  )
+}
+
+
+const WeatherCountry = (name, code) => {
+  const [Weather, setWeather] = useState(null);
+  useEffect(() => {
+    weatherService
+      .getWeatherByCountry(name, code)
+      .then(response => {
+        console.log('Clima del país: ', response.data);
+        setWeather(response.data)
+      })
+  }, [name, code])
+  if (Weather !== null) {
+    console.log('Weather: ', Weather);
+  }
+  return (
+    <div>
+      <h3>Información del clima: {Weather && Weather.name}</h3>
+      {Weather && <img src={`http://openweathermap.org/img/wn/${Weather.weather[0].icon}.png`} alt={Weather.weather[0].description} />}
+      {Weather && <p>Temperatura: {Math.round(Weather.main.temp - 273.15)}°C</p>}
+      {Weather && <p>Descripción: {Weather.weather[0].description}</p>}
+
+    </div>
+  )
+
+
+}
+
+const ViewCountries = ({ countries, onShowCountry }) => {
+  return (
+    <li>{countries.cca3} : {countries.name.common} <button onClick={() => onShowCountry(countries.name.common)} >Ver detalles</button></li>
+  )
+}
+
+const ViewCountry = ({ country }) => {
+  console.log(Object.keys(country.languages))
+  return (
+    <li>
+      <h3>{country.name.common}</h3>
+      <p>Capital: {country.capital}</p>
+      <p>Región: {country.region}</p>
+      <p>Población: {country.population}</p>
+      <h4>Idiomas:</h4>
+      <ul>
+        {
+          Object.keys(country.languages).map((key) => {
+            return <li key={key}>{country.languages[key]}</li>
+          })
+        }
+      </ul>
+      <br />
+      <div>
+        <img src={country.flags.png} />
+      </div>
+      <div>
+        <WeatherCountry name={country.name.common} code={country.cca2} />
+      </div>
+    </li>
+  )
+}
+
+function App() {
+  const [SearchCountry, setSearchCountry] = useState('');
+  const [message, setMessage] = useState(null)
+  const [countries, setCountries] = useState([]);
+  const [currency, setCurrency] = useState(null);
+
+
+  const hook = () => {
+    if (currency) {
+      console.log('useEfect');
+      countriesService
+        .getAll()
+        .then(response => {
+          console.log('promise fulfilled', response.data);
+        });
+    }
+  }
+
+  useEffect(hook, [currency]);
+
+  const handleCountrySearch = (event) => {
+    console.log(event.target.value);
+    setSearchCountry(event.target.value);
+    setCurrency(event.target.value);
+    countriesService
+      .getAll()
+      .then(response => {
+        const filteredCountries = response.data.filter(country => {
+          return country.name.common.toLowerCase().includes(event.target.value.toLowerCase());
+        })
+        if (filteredCountries.length < 10) {
+          setCountries(filteredCountries);
+          setMessage(null);
+        }
+        if (filteredCountries.length >= 10) {
+          setMessage('Demasiados resultados, por favor especifique su búsqueda');
+          setCountries([]);
+        }
+      })
+
+    if (event.target.value === '') {
+      setCountries([]);
+      setMessage(null);
+    }
+  }
+
+
+  const handleShowCountry = (name) => {
+    console.log('Nomrbre del pais: ', name);
+    countriesService
+      .getByName(name)
+      .then(country => {
+        console.log('Destalles del pais: ', country.data);
+        setCountries([country.data]);
+        setCurrency(null);
+      })
+  }
+  return (
+    <div>
+      <SearchCountries CountrySearch={handleCountrySearch} Search={SearchCountry} />
+      <h3>Información de países</h3>
+      {message && <p>{message}</p>}
+      <ul>
+        {
+          countries.map(count => {
+            if (countries.length === 1) {
+              return <ViewCountry key={count.cca2} country={count} />
+            } else {
+              return <ViewCountries key={count.cca2} onShowCountry={handleShowCountry} countries={count} />
+            }
+          }
+          )
+        }
+      </ul>
+    </div>
+  )
+}
+
+export default App
